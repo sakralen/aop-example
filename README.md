@@ -1,4 +1,3 @@
-```java
 @Aspect
 @Component
 public class LoggingAspect {
@@ -21,17 +20,14 @@ public class LoggingAspect {
             "|| isService()" +
             "|| isRestController()")
     public void addLoggingToMethodCall(JoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         StringBuilder sb = new StringBuilder();
 
         // Формирование возвращаемого значения, имени вызывающего класса и названия метода
         sb.append("Invoked method ")
-                .append(signature.getReturnType().getSimpleName())
-                .append(" ")
-                .append(signature.getDeclaringType().getSimpleName())
-                .append(".")
-                .append(signature.getMethod().getName())
+                .append(getMethodName(joinPoint))
                 .append("(");
+
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
         // Получение информации о названиях, типах и значениях параметров
         String[] parameterNames = signature.getParameterNames();
@@ -60,18 +56,35 @@ public class LoggingAspect {
             "|| isRestController()",
             returning = "result")
     public void addLoggingToMethodReturn(JoinPoint joinPoint, Object result) {
+        String sb = "Returned from method " +
+                getMethodName(joinPoint) +
+                ": " +
+                (result != null ? result.toString() : "null");
+
+        log.info(sb);
+    }
+
+    @AfterThrowing(value = "isRepository()" +
+            "|| isService()" +
+            "|| isRestController()",
+            throwing = "throwable")
+    public void addLoggingToMethodThrow(JoinPoint joinPoint, Throwable throwable) {
+        String sb = "Thrown from method " +
+                getMethodName(joinPoint) +
+                ": " +
+                throwable;
+
+        log.info(sb);
+    }
+
+    private static String getMethodName(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        StringBuilder sb = new StringBuilder();
 
-        sb.append("Returned from method ")
-                .append(signature.getDeclaringType().getSimpleName())
-                .append(".")
-                .append(signature.getMethod().getName())
-                .append(": ")
-                .append(result != null ? result.toString() : "null");
-
-        log.info(sb.toString());
+        return signature.getReturnType().getSimpleName() +
+                " " +
+                signature.getDeclaringType().getSimpleName() +
+                "." +
+                signature.getMethod().getName();
     }
 
 }
-```
