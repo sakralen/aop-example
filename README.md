@@ -1,3 +1,4 @@
+```java
 @Aspect
 @Component
 public class LoggingAspect {
@@ -88,3 +89,4 @@ public class LoggingAspect {
     }
 
 }
+```
